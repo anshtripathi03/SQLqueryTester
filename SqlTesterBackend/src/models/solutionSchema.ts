@@ -1,17 +1,17 @@
 import mongoose, { mongo } from "mongoose";
-import userSchema from "./userSchema";
-import assignmentSchema from "./assignmentSchema";
+import User from "./userSchema";
+import Assignment from "./assignmentSchema";
 
 const solutionSchema = new mongoose.Schema(
   {
     userId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: userSchema,
+      ref: User,
       required: true,
     },
     Assignment: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: assignmentSchema,
+      ref: Assignment,
       required: true,
     },
     submittedQuery: {
