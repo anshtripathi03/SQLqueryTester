@@ -23,10 +23,10 @@ const assignmentSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    expectedOutput: {
-      type: mongoose.Schema.Types.Mixed,
-      required: true,
-    },
+    sampleData: {
+      type: String,
+      required: true
+    }
   },
   { timestamps: true },
 );
