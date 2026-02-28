@@ -31,8 +31,6 @@ export const signup = async (req: Request, res: Response) => {
 
     res.cookie("accessToken", token, {
       httpOnly: true,
-      secure: true,
-      sameSite: "strict",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
@@ -45,7 +43,6 @@ export const signup = async (req: Request, res: Response) => {
       },
       message: "User successfully registered",
     });
-
   } catch (error: any) {
     return res.status(500).json({
       message: error?.message,
@@ -53,76 +50,77 @@ export const signup = async (req: Request, res: Response) => {
   }
 };
 
-export const login = async(req: Request, res: Response) => {
-    try {
-        const { email, username, password} = req.body;
+export const login = async (req: Request, res: Response) => {
+  try {
+    const { email, username, password } = req.body;
 
-        const user = await User.findOne({
-            $or: [{email}, {username}]
-        })
+    const user = await User.findOne({
+      $or: [{ email }, { username }],
+    });
 
-        if(!user){
-            return res.status(400).json({
-                message: 'Invalid credentials'
-            })
-        }
-
-        const isMatch = await bcrypt.compare(password, user.password);
-
-        if(!isMatch){
-            return res.status(401).json({
-                message: 'Invalid Password'
-            })
-        }
-
-        const token = await generateToken(user._id.toString());
-
-        res.cookie("accessToken", token, {
-            httpOnly: true,
-            sameSite: 'strict',
-            secure: true,
-            maxAge: 7*24*60*60*1000
-        })
-
-        return res.status(200).json({
-            user,
-            success: true,
-            message: 'Login succesfull'
-        })
-
-    } catch (error: any) {
-        return res.status(500).json({
-            message: error?.message
-        })
+    if (!user) {
+      return res.status(400).json({
+        message: "Invalid credentials",
+      });
     }
-}
 
+    const isMatch = await bcrypt.compare(password, user.password);
 
-export const getUser = async(req: any, res: Response) => {
-    try {
-        const user = await User.findById(req.user.id).select('-password');
-
-        return res.status(201).json({
-            user,
-            message:'User fetched'
-        })
-    } catch (error: any) {
-        return res.status(500).json({
-            message: error?.message
-        })      
+    if (!isMatch) {
+      return res.status(401).json({
+        message: "Invalid Password",
+      });
     }
-}
 
-export const logout = async(req: Request, res: Response) => {
-    try {
-        res.clearCookie("accessToken");
+    const token = await generateToken(user._id.toString());
 
-        return res.status(200).json({
-            message: 'User Logged out successfully'
-        })
-    } catch (error: any) {
-        return res.status(500).json({
-            message: error?.message
-        })
-    }
-}
+    res.cookie("accessToken", token, {
+      httpOnly: true,
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
+    return res.status(200).json({
+      user: {
+        id: user._id,
+        name: user.name,
+        username: user.username,
+        email: user.email,
+      },
+      success: true,
+      message: "Login succesfull",
+    });
+  } catch (error: any) {
+    return res.status(500).json({
+      message: error?.message,
+    });
+  }
+};
+
+export const getUser = async (req: any, res: Response) => {
+  try {
+    const user = await User.findById(req.user.id).select("-password");
+
+    return res.status(201).json({
+      user,
+      message: "User fetched",
+    });
+  } catch (error: any) {
+    return res.status(500).json({
+      message: error?.message,
+    });
+  }
+};
+
+export const logout = async (req: Request, res: Response) => {
+  try {
+    res.clearCookie("accessToken");
+
+    return res.status(200).json({
+      message: "User Logged out successfully",
+    });
+  } catch (error: any) {
+    return res.status(500).json({
+      message: error?.message,
+    });
+  }
+};

@@ -1,0 +1,42 @@
+.card {
+  background: #1e1e1e;
+  color: white;
+  padding: 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+
+  &:hover {
+    transform: translateY(-3px);
+    background: #2a2a2a;
+  }
+
+  &__title {
+    margin: 0 0 0.5rem 0;
+  }
+
+  &__description {
+    font-size: 0.9rem;
+    opacity: 0.8;
+  }
+
+  &__difficulty {
+    margin-top: 1rem;
+    font-weight: bold;
+  }
+
+  &--easy {
+    border-left: 4px solid #4caf50;
+  }
+
+  &--medium {
+    border-left: 4px solid #ff9800;
+  }
+
+  &--hard {
+    border-left: 4px solid #f44336;
+  }
+}
