@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { Response } from "express";
 import Assignment from "../models/assignmentSchema";
 import { validateQuery } from "../utils/validateQuery";
 import pool from "../config/postgre";
@@ -24,7 +24,9 @@ export const executeQuery = async (req: any, res: Response) => {
     }
 
     await pool.query("BEGIN");
+    const start = Date.now();
     const result = await pool.query(query);
+    const executionTime = Date.now() - start;
     await pool.query("ROLLBACK");
 
     await Solution.create({
@@ -35,12 +37,16 @@ export const executeQuery = async (req: any, res: Response) => {
     });
 
     return res.status(200).json({
+      columns: result.fields.map((f: any) => f.name),
+      rowCount: result.rowCount,
       rows: result.rows,
+      executionTime,
       message: " result received ",
     });
+
   } catch (error: any) {
     return res.status(500).json({
-      message: error?.message,
+      message: "Query execution failed",
     });
   }
 };
@@ -50,8 +56,8 @@ export const getUserSolution = async (req: any, res: Response) => {
     const userId = req.user.id;
 
     const solutions = await Solution.find({ userId })
-      .populate("assignmentId", "title description difficulty isCorrect")
-      .select(" submittedQuery executionResult createdAt")
+      .populate("assignmentId", "title description difficulty ")
+      .select(" submittedQuery executionResult isCorrect createdAt")
       .sort({ createdAt: -1 });
 
     return res.status(200).json({
@@ -71,6 +77,7 @@ export const getHint = async (req: any, res: Response) => {
     const { query } = req.body;
 
     const assignment = await Assignment.findById(assignmentId);
+    console.log("Hint assignmentId:", assignmentId);
 
     if (!assignment) {
       return res.status(400).json({

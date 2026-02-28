@@ -1,0 +1,46 @@
+.home {
+  padding: 1rem;
+  min-height: 100vh;
+  background: #121212;
+  color: white;
+
+  &__filter {
+    margin-bottom: 1.5rem;
+
+    select {
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      border: none;
+      background: #1e1e1e;
+      color: white;
+    }
+  }
+
+  &__loading {
+    text-align: center;
+    margin-top: 2rem;
+  }
+
+  &__grid {
+    display: grid;
+    gap: 1rem;
+  }
+
+  @media (min-width: 641px) {
+    &__grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (min-width: 1024px) {
+    &__grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  @media (min-width: 1281px) {
+    &__grid {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+}

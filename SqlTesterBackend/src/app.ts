@@ -4,11 +4,19 @@ import cookieParser from 'cookie-parser';
 import assignmentRoutes from './routes/assignmentRoutes'
 import actionRoutes from './routes/actionRoutes'
 import authRoutes from './routes/authRoutes'
+import dotenv from 'dotenv'
 
 const app = express();
 
+dotenv.config();
+
 app.use(cookieParser());
-app.use(cors());
+app.use(
+  cors({
+    origin: process.env.FRONTEND_URL,
+    credentials: true,
+  })
+);
 app.use(express.json());
 
 app.get("/", (req: Request, res: Response) => {

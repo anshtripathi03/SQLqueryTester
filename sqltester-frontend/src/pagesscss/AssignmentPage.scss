@@ -1,0 +1,82 @@
+.assignment-page {
+  display: flex;
+  flex-direction: column;
+  padding: 1rem;
+  background: #121212;
+  color: white;
+  min-height: 100vh;
+  gap: 2rem;
+
+  &__left {
+    background: #1e1e1e;
+    padding: 1rem;
+    border-radius: 8px;
+  }
+
+  &__difficulty {
+    display: inline-block;
+    margin-bottom: 1rem;
+    font-weight: bold;
+  }
+
+  &__question {
+    margin-bottom: 1rem;
+  }
+
+  &__schema {
+    background: #2a2a2a;
+    padding: 1rem;
+    border-radius: 6px;
+    overflow-x: auto;
+  }
+
+  &__right {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  &__buttons {
+    display: flex;
+    gap: 1rem;
+
+    button {
+      padding: 0.6rem 1rem;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+      background: #4caf50;
+      color: white;
+
+      &:nth-child(2) {
+        background: #ff9800;
+      }
+    }
+  }
+
+  &__result,
+  &__hint {
+    background: #1e1e1e;
+    padding: 1rem;
+    border-radius: 6px;
+    display: none;
+  }
+
+  &__result.visible,
+  &__hint.visible {
+    display: block;
+  }
+
+  /* Desktop Layout */
+  @media (min-width: 1024px) {
+    flex-direction: row;
+
+    &__left {
+      width: 40%;
+    }
+
+    &__right {
+      width: 60%;
+    }
+  }
+}

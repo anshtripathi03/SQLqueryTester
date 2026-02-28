@@ -21,4 +21,6 @@ const server = async(): Promise<void> => {
     }
 }
 
+server();
+
 
