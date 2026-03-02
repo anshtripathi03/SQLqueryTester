@@ -3,7 +3,7 @@ import Assignment from "../models/assignmentSchema";
 import { validateQuery } from "../utils/validateQuery";
 import pool from "../config/postgre";
 import Solution from "../models/solutionSchema";
-import { openai } from "../config/openai";
+import axios from "axios";
 
 const runSQLBlock = async (client: any, sql: string) => {
   const statements = sql
@@ -105,44 +105,52 @@ export const getUserSolution = async (req: any, res: Response) => {
   }
 };
 
+
 export const getHint = async (req: any, res: Response) => {
   try {
-    const { id } = req.params;
+    const { assignmentId } = req.params;
     const { query } = req.body;
 
-    const assignment = await Assignment.findById(id);
-    console.log("Hint assignmentId:", id);
+    const assignment = await Assignment.findById(assignmentId);
 
     if (!assignment) {
-      return res.status(300).json({
+      return res.status(400).json({
         message: "Invalid Assignment ID",
       });
     }
 
-    const prompt = `You are a SQL tutor.
-  Give a helpful hint for solving the following SQL problem.
-  DO NOT provide the final query.
-  Guide the student conceptually.
+    const prompt = `
+You are a SQL tutor.
+Give a short conceptual hint in 25-30 words.
+Do NOT provide the final SQL query or answer.
 
-  Problem:
-    ${assignment.question}
+Problem:
+${assignment.question}
 
-  User Attempt:
-    ${query}
-  `;
+User Attempt:
+${query}
+`;
 
-    const response = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
-      messages: [{ role: "user", content: prompt }],
-    });
+    const response = await axios.post(
+      "http://localhost:11434/api/generate",
+      {
+        model: "mistral",
+        prompt: prompt,
+        stream: false,
+        options: {
+          temperature: 0.4,
+        },
+      }
+    );
 
     return res.json({
-      hint: response.choices[0].message.content,
+      hint: response.data.response,
     });
+
   } catch (error: any) {
-    console.log(error);
+    console.error("OLLAMA ERROR:", error?.message);
     return res.status(500).json({
-      message: error?.message,
+      message: "Hint generation failed",
     });
   }
 };
