@@ -6,14 +6,10 @@ interface AuthRequest extends Request {
 }
 
 export const authMiddleware = (req: AuthRequest, res: Response, next: NextFunction) => {
-  let token: string | undefined;
 
-  if (
-    req.headers.authorization &&
-    req.headers.authorization.startsWith("Bearer")
-  ) {
-    token = req.headers.authorization.split(" ")[1];
-  }
+  const token = req.cookies?.accessToken;
+
+  console.log("Cookie token:", token);
 
   if (!token) {
     return res.status(400).json({
@@ -29,6 +25,7 @@ export const authMiddleware = (req: AuthRequest, res: Response, next: NextFuncti
 
   try {
     const decoded = jwt.verify(token, jwtToken) as { id: string };
+    console.log(decoded);
     req.user = decoded;
     next();
   } catch (error: any) {

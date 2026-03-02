@@ -6,7 +6,7 @@ import { hintLimiter } from "../middleware/rateLimiter";
 const router = express.Router();
 
 router.post("/execute/:assignmentId",authMiddleware,executeQuery);
-router.post("/hint/:assignmentId",authMiddleware, hintLimiter ,getHint);
+router.post("/hint/:id",authMiddleware, hintLimiter ,getHint);
 router.get('/user/solutions', authMiddleware, getUserSolution);
 
 export default router;

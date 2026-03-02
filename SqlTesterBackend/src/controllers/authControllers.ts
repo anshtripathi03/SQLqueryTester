@@ -6,13 +6,14 @@ import bcrypt from "bcrypt";
 export const signup = async (req: Request, res: Response) => {
   try {
     const { email, password, username, name } = req.body;
+    console.log(req.body);
 
     const existingUser = await User.findOne({
       $or: [{ email }, { username }],
     });
 
     if (existingUser) {
-      res.status(400).json({
+      return res.status(400).json({
         message: "User already exists",
       });
     }
@@ -31,6 +32,8 @@ export const signup = async (req: Request, res: Response) => {
 
     res.cookie("accessToken", token, {
       httpOnly: true,
+      secure: false,        
+      sameSite: "lax",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
@@ -76,6 +79,8 @@ export const login = async (req: Request, res: Response) => {
 
     res.cookie("accessToken", token, {
       httpOnly: true,
+      secure: false,        
+      sameSite: "lax",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
@@ -98,7 +103,9 @@ export const login = async (req: Request, res: Response) => {
 
 export const getUser = async (req: any, res: Response) => {
   try {
+    console.log(req);
     const user = await User.findById(req.user.id).select("-password");
+    console.log(user);
 
     return res.status(201).json({
       user,

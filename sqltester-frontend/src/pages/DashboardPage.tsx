@@ -28,6 +28,7 @@ const DashboardPage = () => {
       try {
         setLoading(true);
         const res = await API.get("/action/user/solutions");
+        console.log(res.data);
         setSubmissions(res.data.solutions);
       } catch (err) {
         console.error(err);

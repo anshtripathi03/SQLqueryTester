@@ -26,6 +26,7 @@ export const fetchAssignmentById = createAsyncThunk(
   async (id: string, thunkAPI) => {
     try {
       const res = await API.get(`/assignments/${id}`);
+      console.log(res.data);
       return res.data.assignment;
     } catch (err: any) {
       return thunkAPI.rejectWithValue(err.response?.data?.message);
@@ -38,6 +39,7 @@ export const fetchAssignments = createAsyncThunk(
   async (difficulty: Difficulty, thunkAPI) => {
     try {
       const res = await API.get(`/assignments?difficulty=${difficulty}`);
+      console.log(res.data);
       return res.data.assignments;
     } catch (err: any) {
       return thunkAPI.rejectWithValue(err.response?.data?.message);
@@ -59,6 +61,10 @@ const assignmentSlice = createSlice({
   reducers: {
     setFilter: (state, action: PayloadAction<Difficulty>) => {
       state.filter = action.payload;
+      
+    },
+    setList: (state) => {
+      state.list = []
     },
     setSelectedAssignment: (state, action: PayloadAction<Assignment>) => {
       state.selected = action.payload;
@@ -93,6 +99,6 @@ const assignmentSlice = createSlice({
   },
 });
 
-export const { setFilter, setSelectedAssignment } = assignmentSlice.actions;
+export const { setFilter, setList, setSelectedAssignment } = assignmentSlice.actions;
 
 export default assignmentSlice.reducer;
