@@ -3,32 +3,37 @@ import { useAppDispatch, useAppSelector } from "../app/hooks";
 import {
   fetchAssignments,
   setFilter,
+  setList,
+  type Difficulty,
 } from "../features/assignment/assignmentSlice";
 import AssignmentCard from "../components/assignmentCard";
 import "./../pagesscss/HomePage.scss";
 
 const HomePage = () => {
   const dispatch = useAppDispatch();
-  const { list, filter, loading } = useAppSelector(
-    (state) => state.assignment
-  );
+  const difficulty = ['Easy','Medium','Hard'];
+  const { list, filter, loading } = useAppSelector((state) => state.assignment);
 
   useEffect(() => {
-    dispatch(fetchAssignments(filter));
-  }, [dispatch, filter]);
+    if (list.length === 0) {
+      dispatch(fetchAssignments(filter));
+    }
+  }, [dispatch, filter, list.length]);
 
   return (
     <div className="home">
       <div className="home__filter">
         <select
           value={filter}
-          onChange={(e) =>
-            dispatch(setFilter(e.target.value as any))
-          }
+          onChange={ async(e)=> {
+            const value = e.target.value as Difficulty;
+            dispatch(setFilter(value))
+            dispatch(fetchAssignments(value));
+          }}
         >
-          <option value="Easy">Easy</option>
-          <option value="Medium">Medium</option>
-          <option value="Hard">Hard</option>
+          {difficulty.map((value)=>(
+            <option value={value}>{value}</option>
+          ))}
         </select>
       </div>
 

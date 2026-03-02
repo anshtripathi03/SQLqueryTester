@@ -5,49 +5,83 @@ import pool from "../config/postgre";
 import Solution from "../models/solutionSchema";
 import { openai } from "../config/openai";
 
+const runSQLBlock = async (client: any, sql: string) => {
+  const statements = sql
+    .split(";")
+    .map((s) => s.trim())
+    .filter((s) => s.length > 0);
+
+  for (const stmt of statements) {
+    await client.query(stmt);
+  }
+};
+
 export const executeQuery = async (req: any, res: Response) => {
+  const client = await pool.connect();
+
   try {
     const { assignmentId } = req.params;
     const { query } = req.body;
     const userId = req.user.id;
 
     if (!validateQuery(query)) {
-      return res.status(400).json({ message: "Invalid query type" });
+      return res.status(401).json({ message: "Invalid query type" });
     }
 
     const assignment = await Assignment.findById(assignmentId);
 
     if (!assignment) {
+      console.log('im breaking')
       return res.status(400).json({
         message: "Invalid assignment ID",
       });
     }
 
-    await pool.query("BEGIN");
+    await client.query("BEGIN");
+    await runSQLBlock(client, assignment.postgreSchema);
+    console.log('im breaking2')
+    await runSQLBlock(client, assignment.sampleData);
+    console.log('im breaking3')
     const start = Date.now();
-    const result = await pool.query(query);
+    const studentResult = await client.query(query);
     const executionTime = Date.now() - start;
-    await pool.query("ROLLBACK");
 
+    const expectedResult = await client.query(assignment.expectedOutput);
+console.log('im breaking4')
+    const normalize = (rows: any[]) =>
+      JSON.stringify(
+        rows.sort((a, b) => JSON.stringify(a).localeCompare(JSON.stringify(b))),
+      );
+console.log('im breaking5')
+    const isCorrect =
+      normalize(studentResult.rows) === normalize(expectedResult.rows);
+
+    await client.query("ROLLBACK");
+console.log('im breaking6')
     await Solution.create({
       userId,
       Assignment: assignmentId,
       submittedQuery: query,
-      executionResult: result.rows,
+      executionResult: studentResult.rows,
+      isCorrect,
     });
-
+console.log('im breaking7')
     return res.status(200).json({
-      columns: result.fields.map((f: any) => f.name),
-      rowCount: result.rowCount,
-      rows: result.rows,
+      columns: studentResult.fields.map((f: any) => f.name),
+      rowCount: studentResult.rowCount,
+      rows: studentResult.rows,
       executionTime,
-      message: " result received ",
+      isCorrect,
+      message: "Result received",
     });
-
   } catch (error: any) {
+    console.log(error);
+    await client.query("ROLLBACK");
     return res.status(500).json({
-      message: "Query execution failed",
+      message: error.message,
     });
+  } finally {
+    client.release();
   }
 };
 
@@ -73,14 +107,14 @@ export const getUserSolution = async (req: any, res: Response) => {
 
 export const getHint = async (req: any, res: Response) => {
   try {
-    const { assignmentId } = req.params;
+    const { id } = req.params;
     const { query } = req.body;
 
-    const assignment = await Assignment.findById(assignmentId);
-    console.log("Hint assignmentId:", assignmentId);
+    const assignment = await Assignment.findById(id);
+    console.log("Hint assignmentId:", id);
 
     if (!assignment) {
-      return res.status(400).json({
+      return res.status(300).json({
         message: "Invalid Assignment ID",
       });
     }
@@ -106,6 +140,7 @@ export const getHint = async (req: any, res: Response) => {
       hint: response.choices[0].message.content,
     });
   } catch (error: any) {
+    console.log(error);
     return res.status(500).json({
       message: error?.message,
     });

@@ -6,12 +6,12 @@ const solutionSchema = new mongoose.Schema(
   {
     userId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: User,
+      ref: "User",
       required: true,
     },
     Assignment: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: Assignment,
+      ref: "Assignment",
       required: true,
     },
     submittedQuery: {

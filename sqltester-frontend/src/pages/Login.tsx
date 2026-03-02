@@ -11,45 +11,58 @@ const LoginPage = () => {
     (state) => state.auth
   );
 
-  const [email, setEmail] = useState("");
+  const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
 
   useEffect(() => {
     if (isAuthenticated) {
-      navigate("/");
+      navigate(-1);
     }
   }, [isAuthenticated, navigate]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    dispatch(loginUser({ email, password }));
+
+    dispatch(
+      loginUser({
+        email: identifier,
+        username: identifier,
+        password,
+      })
+    );
   };
 
   return (
-    <div className="auth">
-      <form className="auth__form" onSubmit={handleSubmit}>
-        <h2 className="auth__title">Login</h2>
-
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
-
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
-
-        <button type="submit" disabled={loading}>
-          {loading ? "Logging in..." : "Login"}
+    <div className="auth-overlay">
+      <div className="auth-modal">
+        <button className="auth-close" onClick={() => navigate(-1)}>
+          ✕
         </button>
-      </form>
+
+        <h2>Login</h2>
+
+        <form onSubmit={handleSubmit}>
+          <input
+            type="text"
+            placeholder="Email or Username"
+            value={identifier}
+            onChange={(e) => setIdentifier(e.target.value)}
+            required
+          />
+
+          <input
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+
+          <button type="submit" disabled={loading}>
+            {loading ? "Logging in..." : "Login"}
+          </button>
+        </form>
+      </div>
     </div>
   );
 };

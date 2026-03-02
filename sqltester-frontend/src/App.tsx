@@ -5,8 +5,16 @@ import SignupPage from "./pages/Signup";
 import DashboardPage from "./pages/DashboardPage";
 import AssignmentPage from "./pages/AssignmentPage";
 import Header from "./layout/header";
+import { useAppDispatch } from "./app/hooks";
+import { getCurrentUser } from "./features/auth/authSlice";
+import { useEffect } from "react";
 
 function App() {
+  const dispatch = useAppDispatch();
+
+  useEffect(() => {
+    dispatch(getCurrentUser());
+  }, [dispatch]);
   return (
     <BrowserRouter>
       <Header />

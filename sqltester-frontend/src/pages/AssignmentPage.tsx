@@ -30,6 +30,7 @@ const AssignmentPage = () => {
   const handleSubmit = async () => {
     try {
       const res = await API.post(`/action/execute/${id}`, { query });
+      console.log("RESPONSE:", res.data);
       setResult(res.data.rows);
       setShowResult(true);
       setShowHint(false);
@@ -41,6 +42,7 @@ const AssignmentPage = () => {
   const handleHint = async () => {
     try {
       const res = await API.post(`/action/hint/${id}`, { query });
+      console.log(res.data);
       setHint(res.data.hint);
       setShowHint(true);
       setShowResult(false);

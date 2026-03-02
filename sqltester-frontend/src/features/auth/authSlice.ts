@@ -20,6 +20,7 @@ export const getCurrentUser = createAsyncThunk(
   async (_, thunkAPI) => {
     try {
       const res = await API.get("/auth/getUser");
+      console.log(res.data);
       return res.data.user;
     } catch (err: any) {
       return thunkAPI.rejectWithValue(err.response?.data?.message);
@@ -29,9 +30,10 @@ export const getCurrentUser = createAsyncThunk(
 
 export const loginUser = createAsyncThunk(
   "auth/loginUser",
-  async (data: { email: string; password: string }, thunkAPI) => {
+  async (data: { email: string; username: string; password: string }, thunkAPI) => {
     try {
       const res = await API.post("/auth/login", data);
+      console.log(res.data);
       return res.data.user;
     } catch (err: any) {
       return thunkAPI.rejectWithValue(err.response?.data?.message);
@@ -44,6 +46,7 @@ export const signupUser = createAsyncThunk(
   async (data: { name: string; email: string; password: string, username: string }, thunkAPI) => {
     try {
       const res = await API.post("/auth/signup", data);
+      console.log(res.data);
       return res.data.user;
     } catch (err: any) {
       return thunkAPI.rejectWithValue(err.response?.data?.message);
@@ -55,7 +58,8 @@ export const logoutUser = createAsyncThunk(
   "auth/logoutUser",
   async (_, thunkAPI) => {
     try {
-      await API.post("/auth/logout");
+      const res = await API.post("/auth/logout");
+      console.log(res.data);
       return true;
     } catch (err: any) {
       return thunkAPI.rejectWithValue(err.response?.data?.message);

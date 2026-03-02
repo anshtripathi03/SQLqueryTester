@@ -20,6 +20,7 @@ INSERT INTO employees (name, department, salary) VALUES
 ('Alice', 'HR', 40000),
 ('Bob', 'IT', 60000),
 ('Charlie', 'Finance', 55000);`,
+    expectedOutput: `SELECT * FROM employees`
   },
   {
     title: "Employees with Salary Greater Than 50000",
@@ -38,6 +39,7 @@ INSERT INTO employees (name, department, salary) VALUES
 ('David', 'IT', 70000),
 ('Eve', 'HR', 45000),
 ('Frank', 'Finance', 80000);`,
+    expectedOutput: `SELECT * FROM employees WHERE salary > 50000`
   },
   {
     title: "Count Total Employees",
@@ -55,6 +57,7 @@ CREATE TABLE employees (
 INSERT INTO employees (name, department, salary) VALUES
 ('A', 'HR', 30000),
 ('B', 'IT', 50000);`,
+    expectedOutput: `SELECT COUNT(*) FROM employees`
   },
   {
     title: "Employees in IT Department",
@@ -72,6 +75,7 @@ CREATE TABLE employees (
 INSERT INTO employees (name, department, salary) VALUES
 ('John', 'IT', 60000),
 ('Jane', 'HR', 45000);`,
+    expectedOutput: `SELECT * FROM employees WHERE department = 'IT'`
   },
   {
     title: "Highest Salary",
@@ -89,6 +93,7 @@ INSERT INTO employees (name, salary) VALUES
 ('A', 30000),
 ('B', 90000),
 ('C', 50000);`,
+    expectedOutput: `SELECT MAX(salary) FROM employees`
   },
   {
     title: "Average Salary",
@@ -105,6 +110,7 @@ CREATE TABLE employees (
 INSERT INTO employees (name, salary) VALUES
 ('A', 20000),
 ('B', 40000);`,
+    expectedOutput: `SELECT AVG(salary) FROM employees`
   },
   {
     title: "Distinct Departments",
@@ -122,6 +128,7 @@ INSERT INTO employees (name, department) VALUES
 ('A', 'IT'),
 ('B', 'IT'),
 ('C', 'HR');`,
+    expectedOutput: `SELECT DISTINCT department FROM employees`
   },
   {
     title: "Order Employees by Salary",
@@ -139,6 +146,7 @@ INSERT INTO employees (name, salary) VALUES
 ('A', 20000),
 ('B', 50000),
 ('C', 40000);`,
+    expectedOutput: `SELECT * FROM employees ORDER BY salary DESC`
   },
   {
     title: "Limit Records",
@@ -153,6 +161,7 @@ CREATE TABLE employees (
     sampleData: `
 INSERT INTO employees (name) VALUES
 ('A'), ('B'), ('C');`,
+    expectedOutput: `SELECT * FROM employees LIMIT 2`
   },
   {
     title: "Employees with Salary Between",
@@ -170,14 +179,14 @@ INSERT INTO employees (name, salary) VALUES
 ('A', 25000),
 ('B', 50000),
 ('C', 80000);`,
+    expectedOutput: `SELECT * FROM employees WHERE salary BETWEEN 30000 AND 70000`
   },
+
   {
     title: "Employees with Salary Above Department Average",
-    description:
-      "Find employees whose salary is greater than the average salary of their department.",
+    description: "Find employees whose salary is greater than the average salary of their department.",
     difficulty: "Medium",
-    question:
-      "Write a query using subquery to compare salary with department average.",
+    question: "Write a query using subquery to compare salary with department average.",
     postgreSchema: `
 CREATE TABLE employees (
   id SERIAL PRIMARY KEY,
@@ -191,7 +200,9 @@ INSERT INTO employees (name, department, salary) VALUES
 ('Bob','IT',70000),
 ('Charlie','HR',40000),
 ('David','HR',60000);`,
+    expectedOutput: `SELECT * FROM employees e WHERE salary > (SELECT AVG(salary) FROM employees WHERE department = e.department)`
   },
+
   {
     title: "Total Salary Per Department",
     description: "Calculate total salary paid in each department.",
@@ -208,7 +219,9 @@ INSERT INTO employees (department, salary) VALUES
 ('IT',50000),
 ('IT',60000),
 ('HR',40000);`,
+    expectedOutput: `SELECT department, SUM(salary) AS total_salary FROM employees GROUP BY department`
   },
+
   {
     title: "Employees With No Department",
     description: "Find employees who are not assigned to any department.",
@@ -224,7 +237,9 @@ CREATE TABLE employees (
 INSERT INTO employees (name, department) VALUES
 ('A','IT'),
 ('B',NULL);`,
+    expectedOutput: `SELECT * FROM employees WHERE department IS NULL`
   },
+
   {
     title: "Second Highest Salary Using Limit",
     description: "Find second highest salary using ORDER BY and LIMIT.",
@@ -238,7 +253,9 @@ CREATE TABLE employees (
     sampleData: `
 INSERT INTO employees (salary) VALUES
 (10000),(20000),(30000),(40000);`,
+    expectedOutput: `SELECT salary FROM employees ORDER BY salary DESC OFFSET 1 LIMIT 1`
   },
+
   {
     title: "Employees Hired After 2020",
     description: "Fetch employees hired after year 2020.",
@@ -254,7 +271,9 @@ CREATE TABLE employees (
 INSERT INTO employees (name, hire_date) VALUES
 ('A','2019-01-01'),
 ('B','2021-05-10');`,
+    expectedOutput: `SELECT * FROM employees WHERE hire_date > '2020-12-31'`
   },
+
   {
     title: "Department Employee Count",
     description: "Count employees in each department.",
@@ -268,7 +287,9 @@ CREATE TABLE employees (
     sampleData: `
 INSERT INTO employees (department) VALUES
 ('IT'),('IT'),('HR');`,
+    expectedOutput: `SELECT department, COUNT(*) AS employee_count FROM employees GROUP BY department`
   },
+
   {
     title: "Employees with Salary Above 60000",
     description: "List employees earning above 60000 sorted descending.",
@@ -284,7 +305,9 @@ CREATE TABLE employees (
 INSERT INTO employees (name, salary) VALUES
 ('A',70000),
 ('B',50000);`,
+    expectedOutput: `SELECT * FROM employees WHERE salary > 60000 ORDER BY salary DESC`
   },
+
   {
     title: "Departments Having More Than 1 Employee",
     description: "Find departments with more than one employee.",
@@ -298,7 +321,9 @@ CREATE TABLE employees (
     sampleData: `
 INSERT INTO employees (department) VALUES
 ('IT'),('IT'),('HR');`,
+    expectedOutput: `SELECT department FROM employees GROUP BY department HAVING COUNT(*) > 1`
   },
+
   {
     title: "Employees With Same Salary",
     description: "Find employees sharing the same salary.",
@@ -315,7 +340,9 @@ INSERT INTO employees (name, salary) VALUES
 ('A',50000),
 ('B',50000),
 ('C',60000);`,
+    expectedOutput: `SELECT salary FROM employees GROUP BY salary HAVING COUNT(*) > 1`
   },
+
   {
     title: "Employees Joined in Last 30 Days",
     description: "Find employees hired in last 30 days.",
@@ -331,6 +358,7 @@ CREATE TABLE employees (
 INSERT INTO employees (name, hire_date) VALUES
 ('A',CURRENT_DATE - INTERVAL '10 days'),
 ('B',CURRENT_DATE - INTERVAL '40 days');`,
+    expectedOutput: `SELECT * FROM employees WHERE hire_date >= CURRENT_DATE - INTERVAL '30 days'`
   },
 
   {
@@ -346,7 +374,9 @@ CREATE TABLE employees (
     sampleData: `
 INSERT INTO employees (salary) VALUES
 (10000),(20000),(30000),(40000);`,
+    expectedOutput: `SELECT salary FROM (SELECT salary, DENSE_RANK() OVER (ORDER BY salary DESC) AS rnk FROM employees) t WHERE rnk = 3`
   },
+
   {
     title: "Running Total of Salaries",
     description: "Calculate cumulative salary ordered by id.",
@@ -360,7 +390,9 @@ CREATE TABLE employees (
     sampleData: `
 INSERT INTO employees (salary) VALUES
 (10000),(20000),(30000);`,
+    expectedOutput: `SELECT id, salary, SUM(salary) OVER (ORDER BY id) AS running_total FROM employees`
   },
+
   {
     title: "Employees Who Earn More Than Their Manager",
     description: "Find employees whose salary is greater than their manager.",
@@ -377,7 +409,9 @@ CREATE TABLE employees (
 INSERT INTO employees (id,name,manager_id,salary) VALUES
 (1,'Manager',NULL,50000),
 (2,'Emp1',1,60000);`,
+    expectedOutput: `SELECT e.* FROM employees e JOIN employees m ON e.manager_id = m.id WHERE e.salary > m.salary`
   },
+
   {
     title: "Detect Duplicate Emails",
     description: "Find duplicate emails in users table.",
@@ -393,7 +427,9 @@ INSERT INTO users (email) VALUES
 ('a@test.com'),
 ('a@test.com'),
 ('b@test.com');`,
+    expectedOutput: `SELECT email FROM users GROUP BY email HAVING COUNT(*) > 1`
   },
+
   {
     title: "Pivot Department Salary",
     description: "Show total salary of IT and HR in separate columns.",
@@ -409,7 +445,9 @@ CREATE TABLE employees (
 INSERT INTO employees (department, salary) VALUES
 ('IT',50000),
 ('HR',40000);`,
+    expectedOutput: `SELECT SUM(CASE WHEN department = 'IT' THEN salary ELSE 0 END) AS it_total, SUM(CASE WHEN department = 'HR' THEN salary ELSE 0 END) AS hr_total FROM employees`
   },
+
   {
     title: "Employees With Consecutive IDs",
     description: "Find employees with consecutive IDs.",
@@ -423,7 +461,9 @@ CREATE TABLE employees (
     sampleData: `
 INSERT INTO employees VALUES
 (1,'A'),(2,'B'),(4,'C');`,
+    expectedOutput: `SELECT id, name FROM (SELECT id, name, LAG(id) OVER (ORDER BY id) AS prev_id FROM employees) t WHERE id = prev_id + 1`
   },
+
   {
     title: "Top 2 Salaries Per Department",
     description: "Find top 2 highest salaries in each department.",
@@ -438,7 +478,9 @@ CREATE TABLE employees (
     sampleData: `
 INSERT INTO employees (department,salary) VALUES
 ('IT',50000),('IT',60000),('IT',70000);`,
+    expectedOutput: `SELECT * FROM (SELECT *, RANK() OVER (PARTITION BY department ORDER BY salary DESC) AS rnk FROM employees) t WHERE rnk <= 2`
   },
+
   {
     title: "Median Salary",
     description: "Find median salary.",
@@ -452,7 +494,9 @@ CREATE TABLE employees (
     sampleData: `
 INSERT INTO employees (salary) VALUES
 (10000),(20000),(30000);`,
+    expectedOutput: `SELECT percentile_cont(0.5) WITHIN GROUP (ORDER BY salary) FROM employees`
   },
+
   {
     title: "Employees Not in Department Table",
     description: "Find employees whose department does not exist.",
@@ -471,7 +515,9 @@ INSERT INTO employees (department_id) VALUES
 (1),(2);
 INSERT INTO departments (id) VALUES
 (1);`,
+    expectedOutput: `SELECT * FROM employees e WHERE NOT EXISTS (SELECT 1 FROM departments d WHERE d.id = e.department_id)`
   },
+
   {
     title: "Rank Employees by Salary",
     description: "Assign rank to employees based on salary.",
@@ -485,8 +531,9 @@ CREATE TABLE employees (
     sampleData: `
 INSERT INTO employees (salary) VALUES
 (50000),(60000),(70000);`,
-  },
-];
+    expectedOutput: `SELECT salary, RANK() OVER (ORDER BY salary DESC) AS rank FROM employees`
+  }
+]
 
 dotenv.config();
 

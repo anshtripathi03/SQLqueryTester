@@ -1,4 +1,4 @@
-import mongoose, { mongo } from "mongoose";
+import mongoose from "mongoose";
 
 const assignmentSchema = new mongoose.Schema(
   {
@@ -25,10 +25,14 @@ const assignmentSchema = new mongoose.Schema(
     },
     sampleData: {
       type: String,
-      required: true
+      required: true,
+    },
+    expectedOutput: {
+      type: String,
+      required: true,
     }
   },
-  { timestamps: true },
+  { timestamps: true }
 );
 
 export default mongoose.model("Assignment", assignmentSchema);
