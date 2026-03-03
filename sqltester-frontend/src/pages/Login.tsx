@@ -7,8 +7,8 @@ import "./../pagesscss/Login.scss";
 const LoginPage = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  const { isAuthenticated, loading } = useAppSelector(
-    (state) => state.auth
+  const { isAuthenticated, loading, error } = useAppSelector(
+    (state) => state.auth,
   );
 
   const [identifier, setIdentifier] = useState("");
@@ -28,7 +28,7 @@ const LoginPage = () => {
         email: identifier,
         username: identifier,
         password,
-      })
+      }),
     );
   };
 
@@ -57,11 +57,15 @@ const LoginPage = () => {
             onChange={(e) => setPassword(e.target.value)}
             required
           />
-
+          {error && <div className="auth-error">{error || "Login failed"}</div>}
           <button type="submit" disabled={loading}>
             {loading ? "Logging in..." : "Login"}
           </button>
         </form>
+        <p className="auth-switch">
+          Don&apos;t have an account?{" "}
+          <span onClick={() => navigate("/signup")}>Signup</span>
+        </p>
       </div>
     </div>
   );

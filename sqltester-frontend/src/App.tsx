@@ -8,6 +8,7 @@ import Header from "./layout/header";
 import { useAppDispatch } from "./app/hooks";
 import { getCurrentUser } from "./features/auth/authSlice";
 import { useEffect } from "react";
+import { Toaster } from "react-hot-toast";
 
 function App() {
   const dispatch = useAppDispatch();
@@ -16,6 +17,17 @@ function App() {
     dispatch(getCurrentUser());
   }, [dispatch]);
   return (
+    <>
+     <Toaster
+        position="top-right"
+        toastOptions={{
+          style: {
+            background: "#1e1e1e",
+            color: "#fff",
+            border: "1px solid #333",
+          },
+        }}
+      />
     <BrowserRouter>
       <Header />
       <Routes>
@@ -26,6 +38,7 @@ function App() {
         <Route path="/assignment/:id" element={<AssignmentPage />} />
       </Routes>
     </BrowserRouter>
+    </>
   );
 }
 

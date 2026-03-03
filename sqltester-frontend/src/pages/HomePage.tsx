@@ -3,16 +3,19 @@ import { useAppDispatch, useAppSelector } from "../app/hooks";
 import {
   fetchAssignments,
   setFilter,
-  setList,
   type Difficulty,
 } from "../features/assignment/assignmentSlice";
+import toast from "react-hot-toast";
 import AssignmentCard from "../components/assignmentCard";
 import "./../pagesscss/HomePage.scss";
+import HomeSkeleton from "./Skeleton";
 
 const HomePage = () => {
   const dispatch = useAppDispatch();
-  const difficulty = ['Easy','Medium','Hard'];
-  const { list, filter, loading } = useAppSelector((state) => state.assignment);
+  const difficulty = ["Easy", "Medium", "Hard"];
+  const { list, filter, loading, error } = useAppSelector(
+    (state) => state.assignment,
+  );
 
   useEffect(() => {
     if (list.length === 0) {
@@ -20,25 +23,42 @@ const HomePage = () => {
     }
   }, [dispatch, filter, list.length]);
 
+  useEffect(() => {
+    if (error) {
+      toast.error("Failed to load assignments");
+    }
+  }, [error]);
+
   return (
     <div className="home">
       <div className="home__filter">
         <select
           value={filter}
-          onChange={ async(e)=> {
+          onChange={async (e) => {
             const value = e.target.value as Difficulty;
-            dispatch(setFilter(value))
+            dispatch(setFilter(value));
             dispatch(fetchAssignments(value));
           }}
         >
-          {difficulty.map((value)=>(
+          {difficulty.map((value) => (
             <option value={value}>{value}</option>
           ))}
         </select>
       </div>
 
       {loading ? (
-        <div className="home__loading">Loading...</div>
+        <HomeSkeleton />
+      ) : error ? (
+        <div className="home__error">
+          <h3>Something went wrong</h3>
+          <p>{error}</p>
+          <button
+            onClick={() => dispatch(fetchAssignments(filter))}
+            className="retry-btn"
+          >
+            Retry
+          </button>
+        </div>
       ) : (
         <div className="home__grid">
           {list.map((assignment: any) => (

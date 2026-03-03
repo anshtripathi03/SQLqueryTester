@@ -5,53 +5,121 @@ import API from "../services/axios";
 import "./../pagesscss/AssignmentPage.scss";
 import { useAppDispatch, useAppSelector } from "../app/hooks";
 import { fetchAssignmentById } from "../features/assignment/assignmentSlice";
+import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
+import AssignmentSkeleton from "./AssignmentSkeleton";
 
 const AssignmentPage = () => {
   const { id } = useParams();
   const dispatch = useAppDispatch();
+  const navigate = useNavigate();
+  const { user } = useAppSelector((state) => state.auth);
 
-  const { selected: assignment, loading, error } = useAppSelector(
-    (state) => state.assignment
-  );
+  const {
+    selected: assignment,
+    loading,
+    error,
+  } = useAppSelector((state) => state.assignment);
 
   const [query, setQuery] = useState("");
-  const [result, setResult] = useState<any[]>([]);
-  const [hint, setHint] = useState<string>("");
-
-  const [showResult, setShowResult] = useState(false);
-  const [showHint, setShowHint] = useState(false);
+  const [outputType, setOutputType] = useState<"result" | "hint" | null>(null);
+  const [outputData, setOutputData] = useState<string>("");
+  const [loadingAction, setLoadingAction] = useState<"submit" | "hint" | null>(
+    null,
+  );
 
   useEffect(() => {
     if (id) {
       dispatch(fetchAssignmentById(id));
     }
-  }, [id, dispatch]);
+  }, [id, dispatch, user, navigate]);
 
   const handleSubmit = async () => {
+    if (!id) return;
+    if (!user) {
+      toast("Please sign up to start solving assignments 🚀", {
+        icon: "⚡",
+      });
+      navigate("/login");
+      return;
+    }
+
     try {
+      setLoadingAction("submit");
+      setOutputType("result");
+
       const res = await API.post(`/action/execute/${id}`, { query });
-      console.log("RESPONSE:", res.data);
-      setResult(res.data.rows);
-      setShowResult(true);
-      setShowHint(false);
+
+      const formatted =
+        res.data.rows.length > 0
+          ? JSON.stringify(res.data.rows, null, 2)
+          : "No result returned.";
+
+      setOutputData(formatted);
     } catch (err) {
-      console.error(err);
+      setOutputData("Error executing query.");
+    } finally {
+      setLoadingAction(null);
+    }
+  };
+
+  const renderTable = (dataString: string) => {
+    try {
+      const rows = JSON.parse(dataString);
+      if (!rows || rows.length === 0) return <p>No rows returned.</p>;
+
+      const columns = Object.keys(rows[0]);
+
+      return (
+        <table className="result-table">
+          <thead>
+            <tr>
+              {columns.map((col) => (
+                <th key={col}>{col}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((row: any, index: number) => (
+              <tr key={index}>
+                {columns.map((col) => (
+                  <td key={col}>{row[col]}</td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      );
+    } catch {
+      return <pre>{dataString}</pre>;
     }
   };
 
   const handleHint = async () => {
+    if (!id) return;
+    if (!user) {
+      toast("Please sign up to start solving assignments 🚀", {
+        icon: "⚡",
+      });
+      navigate("/login");
+      return;
+    }
+
     try {
+      setLoadingAction("hint");
+      setOutputType("hint");
+
       const res = await API.post(`/action/hint/${id}`, { query });
-      console.log(res.data);
-      setHint(res.data.hint);
-      setShowHint(true);
-      setShowResult(false);
+
+      setOutputData(res.data.hint);
     } catch (err) {
-      console.error(err);
+      setOutputData("Error generating hint.");
+    } finally {
+      setLoadingAction(null);
     }
   };
 
-  if (loading) return <div>Loading...</div>;
+  if (loading) return <AssignmentSkeleton />;
   if (error) return <div>{error}</div>;
   if (!assignment) return null;
 
@@ -63,9 +131,7 @@ const AssignmentPage = () => {
           {assignment.difficulty}
         </span>
 
-        <p className="assignment-page__question">
-          {assignment.question}
-        </p>
+        <p className="assignment-page__question">{assignment.question}</p>
 
         <pre className="assignment-page__schema">
           {assignment.postgreSchema}
@@ -82,27 +148,39 @@ const AssignmentPage = () => {
         />
 
         <div className="assignment-page__buttons">
-          <button onClick={handleSubmit}>
-            Submit
+          <button
+            className="primary-btn"
+            onClick={handleSubmit}
+            disabled={loadingAction !== null}
+          >
+            {loadingAction === "submit" ? "Executing..." : "Run Query"}
           </button>
-          <button onClick={handleHint}>
-            Hint
+
+          <button
+            className="secondary-btn"
+            onClick={handleHint}
+            disabled={loadingAction !== null}
+          >
+            {loadingAction === "hint" ? "Generating..." : "Get Hint"}
           </button>
         </div>
 
-        {showResult && (
-          <div className="assignment-page__result visible">
-            {result.length > 0 ? (
-              <pre>{JSON.stringify(result, null, 2)}</pre>
-            ) : (
-              <p>No result yet.</p>
-            )}
-          </div>
-        )}
+        {outputType && (
+          <div
+            className={`assignment-page__output ${loadingAction ? "loading" : ""}`}
+          >
+            <div className="output-header">
+              <h3>{outputType === "result" ? "Result" : "Hint"}</h3>
+              {loadingAction && <span className="spinner" />}
+            </div>
 
-        {showHint && (
-          <div className="assignment-page__hint visible">
-            <p>{hint}</p>
+            {!loadingAction && outputType === "hint" && (
+              <div className="hint-content">{outputData}</div>
+            )}
+
+            {!loadingAction && outputType === "result" && (
+              <div className="result-content">{renderTable(outputData)}</div>
+            )}
           </div>
         )}
       </div>
