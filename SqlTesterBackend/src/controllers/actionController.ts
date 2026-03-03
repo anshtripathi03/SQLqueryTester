@@ -4,6 +4,7 @@ import { validateQuery } from "../utils/validateQuery";
 import pool from "../config/postgre";
 import Solution from "../models/solutionSchema";
 import axios from "axios";
+import { openai } from "../config/openai";
 
 const runSQLBlock = async (client: any, sql: string) => {
   const statements = sql
@@ -119,36 +120,34 @@ export const getHint = async (req: any, res: Response) => {
       });
     }
 
-    const prompt = `
-You are a SQL tutor.
-Give a short conceptual hint in 25-30 words.
-Do NOT provide the final SQL query or answer.
-
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4o-mini",  
+      temperature: 0.4,
+      messages: [
+        {
+          role: "system",
+          content:
+            "You are a SQL tutor. Give short conceptual hints (25-30 words). Never provide the final SQL query or direct solution.",
+        },
+        {
+          role: "user",
+          content: `
 Problem:
 ${assignment.question}
 
 User Attempt:
-${query}
-`;
-
-    const response = await axios.post(
-      "http://localhost:11434/api/generate",
-      {
-        model: "mistral",
-        prompt: prompt,
-        stream: false,
-        options: {
-          temperature: 0.4,
+${query || "No attempt provided."}
+          `,
         },
-      }
-    );
-
-    return res.json({
-      hint: response.data.response,
+      ],
     });
 
+    return res.status(200).json({
+      hint: completion.choices[0].message.content,
+    });
   } catch (error: any) {
-    console.error("OLLAMA ERROR:", error?.message);
+    console.error("OPENAI ERROR:", error?.message);
+
     return res.status(500).json({
       message: "Hint generation failed",
     });
