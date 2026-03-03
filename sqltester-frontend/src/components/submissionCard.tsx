@@ -1,4 +1,4 @@
-import "./scss/SubmissionCard.scss";
+import "./scss/submissionCard.scss";
 
 interface Submission {
   _id: string;
